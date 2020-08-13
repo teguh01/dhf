@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:string_splitter/string_splitter.dart';
+
+import 'sensor.dart';
 
 Future<Album> fetchAlbum() async {
   final response = await http.get(
@@ -22,23 +25,9 @@ Future<Album> fetchAlbum() async {
   }
 }
 
-class Album {
-  final String suhu;
-
-  Album({this.suhu});
-
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      suhu: json['m2m:cin']['con']['temperature'],
-    );
-  }
-}
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
-  MyApp({Key key}) : super(key: key);
-
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -47,7 +36,7 @@ class _MyAppState extends State<MyApp> {
   Future<Album> futureAlbum;
 
   setUpTimedFetch() {
-    Timer.periodic(Duration(milliseconds: 1000), (timer) {
+    Timer.periodic(Duration(milliseconds: 5000), (timer) {
       setState(() {
         futureAlbum = fetchAlbum();
       });
@@ -76,9 +65,17 @@ class _MyAppState extends State<MyApp> {
           child: FutureBuilder<Album>(
             future: futureAlbum,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Text(snapshot.data.suhu);
-              } else if (snapshot.hasError) {
+              if(snapshot.hasData){
+                return Container(
+                padding: EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(snapshot.data.suhu),
+                  ]
+                ),
+              );
+              }else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
               }
               return CircularProgressIndicator();
